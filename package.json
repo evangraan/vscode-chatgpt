@@ -43,7 +43,11 @@
         "command": "chatgpt.clearHistory",
         "title": "ChatGPT: Clear Conversation History"
       }
-    ]
+    ],
+    "files": [
+      "extension.js",
+      "prompt.json"
+    ]    
   }
 }
 
