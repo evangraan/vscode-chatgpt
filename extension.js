@@ -174,7 +174,7 @@ function generateFormHTML(selectedText, fileTreeHTML) {
           event.preventDefault();
           const question = document.getElementById('question').value;
           const useSelection = document.getElementById('useSelection').checked;
-          const checkboxes = Array.from(document.querySelectorAll('input[type="checkbox"]:checked'));
+          const checkboxes = Array.from(document.querySelectorAll('input[type="checkbox"]:checked')).filter(cb => cb.value && cb.type === 'checkbox' && cb.value !== 'on');
           const files = checkboxes.map(cb => cb.value);
           vscode.postMessage({ command: 'submit', content: { question, useSelection, files } });
         });
