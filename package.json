@@ -1,0 +1,51 @@
+{
+  "name": "vscode-chatgpt",
+  "version": "0.0.1",
+  "description": "Ask ChatGPT directly from VS Code using an API key.",
+  "keywords": [
+    "chatgpt"
+  ],
+  "license": "ISC",
+  "author": "Ernst van Graan",
+  "type": "commonjs",
+  "main": "./extension.js",
+  "scripts": {
+    "test": "test"
+  },
+  "dependencies": {
+    "axios": "^1.9.0"
+  },
+  "engines": {
+    "vscode": "^1.80.0"
+  },
+  "displayName": "VSCode ChatGPT",
+  "publisher": "ernstvangraan",
+  "activationEvents": [
+    "onCommand:chatgpt.ask"
+  ],
+  "contributes": {
+    "configuration": {
+      "title": "ChatGPT",
+      "properties": {
+        "chatgpt.apiKey": {
+          "type": "string",
+          "description": "Your OpenAI API Key (starts with sk-)",
+          "default": ""
+        }
+      }
+    },
+    "commands": [
+      {
+        "command": "chatgpt.ask",
+        "title": "ChatGPT: Ask"
+      },
+      {
+        "command": "chatgpt.clearHistory",
+        "title": "ChatGPT: Clear Conversation History"
+      }
+    ]
+  }
+}
+
+
+
