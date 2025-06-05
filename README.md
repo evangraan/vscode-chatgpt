@@ -36,5 +36,7 @@ You can bind any key that is available to 'ChatGPT: Ask' and 'ChatGPT: Clear Con
 # Conversation context
 The extension replays previous conversation history until cleared, providing a seamless conversational experience.
 
+The current file open in VSCode is used for context. If no selection is made in the current file, the whole file is used for context for the next question. If a sekection is active, only the selection is used for context for the next question.
+
 # Code formatting
 The extention uses Prism to do code formatting.
