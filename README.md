@@ -14,7 +14,15 @@ Create ```.vscode/settings.json``` with content:
 
 # Development and installation
 
+# Environment
 This code base was built on MacOS.
+
+```
+brew install npm
+npm init
+npm install axios
+npm install -g @vscode/vsce
+```
 
 ## Building
 In order to build the extension, run ```./build.sh``` in the root directory. This moves the ```.vscode/settings.json``` file to ```../```, then builds the package, then moves the ```settings.json``` back to the ```.vscode``` directory. This avoids adding the secret to the package, but enables VSIX installation to include the secret.
