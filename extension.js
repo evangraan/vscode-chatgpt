@@ -43,7 +43,6 @@ function activate(context) {
     panel.webview.onDidReceiveMessage(async message => {
       if (message.command === 'submit') {
         const { question, useSelection, files } = message.content;
-
         const codeToUse = useSelection && selectedText.trim().length > 0 ? selectedText : '';
         let fileContents = '';
 
@@ -57,7 +56,12 @@ function activate(context) {
         }
 
         const promptPrefix = config.get('prompt') || '';
-        const userMessage = `${question}\n\n${promptPrefix}\n\n${codeToUse}\n\n${fileContents}`;
+        const userMessage = `${question}\n\n${codeToUse}\n\n${fileContents}`;
+        conversationHistory = [
+          { role: 'system', content: promptPrefix },
+          { role: 'user', content: userMessage }
+        ];
+
         conversationHistory.push({ role: 'user', content: userMessage });
 
         await vscode.window.withProgress({
@@ -91,6 +95,20 @@ function activate(context) {
             );
 
             responsePanel.webview.html = getWebviewContent(reply);
+
+            responsePanel.webview.onDidReceiveMessage(async msg => {
+              if (msg.command === 'saveFile') {
+                const { filename, code } = msg.content;
+                const uri = await vscode.window.showSaveDialog({
+                  defaultUri: vscode.Uri.file(path.join(vscode.workspace.workspaceFolders[0].uri.fsPath, filename)),
+                  filters: { 'All files': ['*'] }
+                });
+                if (uri) {
+                  fs.writeFileSync(uri.fsPath, code, 'utf-8');
+                  vscode.window.showInformationMessage(`Saved file: ${uri.fsPath}`);
+                }
+              }
+            });
           } catch (err) {
             vscode.window.showErrorMessage(`ChatGPT error: ${err.message}`);
           }
@@ -107,7 +125,6 @@ function activate(context) {
   context.subscriptions.push(askDisposable, clearHistoryDisposable);
 }
 
-// Recursively scan directory and generate nested HTML list
 function buildFileTreeHTML(basePath, currentPath) {
   const items = fs.readdirSync(currentPath, { withFileTypes: true });
   const entries = items
@@ -183,13 +200,18 @@ function getWebviewContent(reply) {
       continue;
     } else if (i % 3 === 2) {
       const lang = parts[i - 1] || 'plaintext';
-      const escapedCode = parts[i]
+      const code = parts[i];
+      const escapedCode = code
         .replace(/&/g, '&amp;')
         .replace(/</g, '&lt;')
         .replace(/>/g, '&gt;')
         .replace(/"/g, '&quot;')
         .replace(/'/g, '&#39;');
+
+      const encoded = Buffer.from(JSON.stringify({ filename: `response.${lang}`, code }), 'utf-8').toString('base64');
+
       html += `<pre><code class="language-${lang}">${escapedCode}</code></pre>`;
+      html += `<button class="save-button" data-payload="${encoded}">Save to File</button>`;
     }
   }
 
@@ -212,7 +234,21 @@ function getWebviewContent(reply) {
     <body>
       <h2>ChatGPT Response</h2>
       ${html}
-      <script>Prism.highlightAll();</script>
+      <script>
+        const vscode = acquireVsCodeApi();
+        document.querySelectorAll('.save-button').forEach(button => {
+          button.addEventListener('click', () => {
+            const payload = button.getAttribute('data-payload');
+            try {
+              const decoded = JSON.parse(atob(payload));
+              vscode.postMessage({ command: 'saveFile', content: decoded });
+            } catch (e) {
+              console.error('Failed to decode save payload', e);
+            }
+          });
+        });
+        Prism.highlightAll();
+      </script>
     </body>
     </html>
   `;
