@@ -14,7 +14,7 @@ For quick installation, use CMD + Shift + P and select Install from VSIX, then s
 
 # Development
 
-# Environment
+## Environment
 This code base was built on MacOS.
 
 ```
