@@ -89,44 +89,55 @@ function activate(context) {
 }
 
 function getWebviewContent(reply) {
-  // Escape outer content, but not code blocks yet
-  const raw = reply;
+  const parts = reply.split(/```([\w]*)\n([\s\S]*?)```/g);
 
-  // Match ```lang\ncode``` blocks
-  const highlighted = raw.replace(/```(\w+)?\n([\s\S]*?)```/g, (match, lang, code) => {
-    const language = lang || 'plaintext';
-    const escapedCode = code
-      .replace(/&/g, '&amp;')
-      .replace(/</g, '&lt;')
-      .replace(/>/g, '&gt;')
-      .replace(/"/g, '&quot;')
-      .replace(/'/g, '&#39;');
-    return `<pre><code class="language-${language}">${escapedCode}</code></pre>`;
-  });
+  let html = '';
+  for (let i = 0; i < parts.length; i++) {
+    if (i % 3 === 0) {
+      const escapedText = parts[i]
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/\n/g, '<br>');
+      html += `<p>${escapedText}</p>`;
+    } else if (i % 3 === 1) {
+      continue; // language tag handled with code block
+    } else if (i % 3 === 2) {
+      const lang = parts[i - 1] || 'plaintext';
+      const escapedCode = parts[i]
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+      html += `<pre><code class="language-${lang}">${escapedCode}</code></pre>`;
+    }
+  }
 
   return `
     <!DOCTYPE html>
     <html lang="en">
     <head>
-      <meta charset="UTF-8">
+      <meta charset="UTF-8" />
       <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism.min.css" rel="stylesheet" />
       <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
       <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-core.min.js"></script>
       <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/autoloader/prism-autoloader.min.js"></script>
       <style>
         body { font-family: sans-serif; padding: 1em; }
-        pre { background: #f5f5f5; padding: 1em; border-radius: 6px; overflow: auto; }
-        code { font-family: monospace; }
+        pre { background: #f5f5f5; padding: 1em; border-radius: 6px; overflow-x: auto; }
+        code { font-family: monospace; font-size: 0.95em; }
+        p { margin-bottom: 1em; }
       </style>
     </head>
     <body>
       <h2>ChatGPT Response</h2>
-      ${highlighted}
+      ${html}
+      <script>Prism.highlightAll();</script>
     </body>
     </html>
   `;
 }
-
 
 function deactivate() {}
 
