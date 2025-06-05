@@ -3,13 +3,30 @@
 
 const vscode = require('vscode');
 const axios = require('axios');
+const fs = require('fs');
+const path = require('path');
 
 let conversationHistory = [];
+
+// Load configuration from config.json
+function loadConfig() {
+  const configPath = path.join(__dirname, 'prompt.json');
+  if (fs.existsSync(configPath)) {
+    const configContent = fs.readFileSync(configPath, 'utf-8');
+    return JSON.parse(configContent);
+  } else {
+    vscode.window.showErrorMessage('Configuration file not found.');
+    return null;
+  }
+}
 
 /**
  * @param {vscode.ExtensionContext} context
  */
 function activate(context) {
+  const configData = loadConfig();
+  if (!configData) return; // Exit if config is not loaded
+
   const askDisposable = vscode.commands.registerCommand('chatgpt.ask', async () => {
     const editor = vscode.window.activeTextEditor;
     if (!editor) {
@@ -44,7 +61,7 @@ function activate(context) {
       cancellable: false
     }, async () => {
       try {
-        const userMessage = `${prompt}\n\nDetail:\n\n${codeToUse}`;
+        const userMessage = `${prompt}\n\n${configData.genericPrompt}\n\n${codeToUse}`;
 
         conversationHistory.push({ role: 'user', content: userMessage });
 
