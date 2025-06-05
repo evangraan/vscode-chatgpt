@@ -10,7 +10,7 @@ Example prompt:
 
 # Installation
 
-For quick installation, use CMD + Shift + P and select Install from VSIX, then select the ``.vsix``` file in this repository.
+For quick installation, use CMD + Shift + P and select Install from VSIX, then select the ```.vsix``` file in this repository.
 
 # Development
 
