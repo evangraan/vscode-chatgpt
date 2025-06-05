@@ -5,7 +5,7 @@
   "keywords": [
     "chatgpt"
   ],
-  "license": "MIT",
+  "license": "ISC",
   "author": "Ernst van Graan",
   "type": "commonjs",
   "main": "./extension.js",
@@ -31,7 +31,12 @@
           "type": "string",
           "description": "Your OpenAI API Key (starts with sk-)",
           "default": ""
-        }
+        },
+        "chatgpt.prompt": {
+          "type": "string",
+          "description": "Generic prompt prefix to add before sending to ChatGPT (e.g. system role or instructions)",
+          "default": ""
+        }        
       }
     },
     "commands": [

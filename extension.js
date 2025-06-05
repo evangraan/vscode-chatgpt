@@ -5,25 +5,7 @@ const axios = require('axios');
 
 let conversationHistory = [];
 
-function loadConfig() {
-  try {
-    const configPath = path.join(__dirname, 'prompt.json');
-    if (fs.existsSync(configPath)) {
-      const configContent = fs.readFileSync(configPath, 'utf-8');
-      return JSON.parse(configContent);
-    } else {
-      vscode.window.showErrorMessage('prompt.json not found in extension directory.');
-      return {};
-    }
-  } catch (e) {
-    vscode.window.showErrorMessage('Failed to load prompt.json: ' + e.message);
-    return {};
-  }
-}
-
 function activate(context) {
-  const configData = loadConfig();
-
   const askDisposable = vscode.commands.registerCommand('chatgpt.ask', async () => {
     const editor = vscode.window.activeTextEditor;
     if (!editor) {
@@ -74,7 +56,8 @@ function activate(context) {
           }
         }
 
-        const userMessage = `${question}\n\n${configData.genericPrompt || ''}\n\n${codeToUse}\n\n${fileContents}`;
+        const promptPrefix = config.get('prompt') || '';
+        const userMessage = `${question}\n\n${promptPrefix}\n\n${codeToUse}\n\n${fileContents}`;
         conversationHistory.push({ role: 'user', content: userMessage });
 
         await vscode.window.withProgress({
